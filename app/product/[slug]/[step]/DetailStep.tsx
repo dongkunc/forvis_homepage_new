@@ -270,7 +270,10 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
       {/* 상단 타이틀 */}
       <section className="max-w-[1500px] mx-auto px-5 md:px-8 pt-20 md:pt-24 pb-4 md:pb-6">
         <div className="flex items-end justify-between">
-          <h1 className="text-[22px] md:text-3xl font-semibold">{product.title}</h1>
+          {/* ✅ 모바일은 진한 검정, 데스크탑은 거의-검정 */}
+          <h1 className="text-[22px] md:text-3xl font-semibold text-black md:text-neutral-900">
+            {product.title}
+          </h1>
           <div className="flex items-center gap-3 text-sm text-neutral-500">
             <span>페이지 {p} / 3</span>
           </div>
@@ -311,9 +314,15 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
           <div className="bg-[#f2f2f2] rounded-3xl overflow-hidden border border-black/5">
             <div className="px-6 md:px-10 lg:px-14 pt-10 md:pt-12 text-center">
               <div className="translate-y-[16px] md:translate-y-[25px] space-y-2 md:space-y-3">
-                <h2 className="text-[22px] md:text-[30px] font-semibold mb-4 md:mb-6">{copy.p2.title}</h2>
+                {/* ✅ 모바일에서 title/문구 선명하게 */}
+                <h2 className="text-[22px] md:text-[30px] font-semibold text-black md:text-neutral-900 mb-4 md:mb-6">
+                  {copy.p2.title}
+                </h2>
                 {copy.p2.subs.map((line, i) => (
-                  <p key={i} className="text-[16px] md:text-[20px] font-semibold text-neutral-700 leading-relaxed">
+                  <p
+                    key={i}
+                    className="text-[16px] md:text-[20px] font-semibold text-black md:text-neutral-800 leading-relaxed"
+                  >
                     {line}
                   </p>
                 ))}
@@ -343,60 +352,61 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
                 {copy.tabs.map((t) => (
                   <li key={t.key} className="relative">
                     <button
-                      ref={(el) => { btnRefs.current[t.key] = el; }}
+                      ref={(el) => {
+                        btnRefs.current[t.key] = el;
+                      }}
                       onClick={() => setActive(t.key)}
                       role="tab"
                       aria-selected={active === t.key}
                       aria-controls={`panel-${t.key}`}
                       className={`w-full flex items-center justify-between rounded-2xl px-5 py-4 text-left transition
-                        ${active === t.key ? "bg-white shadow-sm" : "bg-[#e2e2e2] hover:bg-[#dbdbdb]"}`}
+                        ${active === t.key ? "bg-white shadow-sm" : "bg-[#e2e2e2] hover:bg-[#dbdbdb]"}
+                      `}
                     >
-                      <span className="text-[16px] md:text-[18px] font-semibold">＋ {t.title}</span>
+                      {/* ✅ 모바일/데스크탑 모두 텍스트 선명하게 */}
+                      <span className="text-[16px] md:text-[18px] font-semibold text-black md:text-neutral-900">
+                        ＋ {t.title}
+                      </span>
                     </button>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* 우측 제품 이미지 + 패널 */}
+            {/* 우측 패널 영역 (✅ 이미지 삭제) */}
             <div
               ref={rightRef}
               className="relative rounded-3xl overflow-hidden bg-white border border-black/10 min-h-[420px] sm:min-h-[480px] md:min-h-[540px]"
             >
-              <Image
-                src={product.image}
-                alt={`${product.title} 제품`}
-                fill
-                className="object-contain"
-                sizes="(max-width:1024px) 100vw, 50vw"
-                priority
-              />
-
-              {/* 디테일 패널 (데스크톱에서만 떠 있게) */}
+              {/* 이미지 삭제 → 패널만 뜨게 유지 */}
               <div
                 ref={panelRef}
                 id={`panel-${active}`}
                 role="tabpanel"
                 aria-live="polite"
-                className="hidden lg:block absolute z-10 rounded-2xl bg-white/95 backdrop-blur-sm border border-black/10 shadow-sm"
-                style={{ top: panelTop, left: 12, right: 12 }}
+                className="absolute z-10 rounded-2xl bg-white/95 backdrop-blur-sm border border-black/10 shadow-sm left-3 right-3 md:left-4 md:right-4"
+                style={{ top: panelTop }}
               >
                 <div className="px-6 py-5">
-                  <h3 className="text-[16px] font-bold mb-2">
+                  <h3 className="text-[16px] font-bold text-black md:text-neutral-900 mb-2">
                     {copy.tabs.find((x) => x.key === active)?.title}
                   </h3>
                   {(() => {
                     const body = copy.tabs.find((x) => x.key === active)?.body;
                     if (Array.isArray(body)) {
                       return (
-                        <ul className="list-disc pl-5 text-[15px] leading-relaxed text-neutral-700 space-y-1">
+                        <ul className="list-disc pl-5 text-[15px] leading-relaxed text-black md:text-neutral-800 space-y-1">
                           {body.map((line, i) => (
                             <li key={i}>{line}</li>
                           ))}
                         </ul>
                       );
                     }
-                    return <p className="text-[15px] leading-relaxed text-neutral-700">{body}</p>;
+                    return (
+                      <p className="text-[15px] leading-relaxed text-black md:text-neutral-800">
+                        {body}
+                      </p>
+                    );
                   })()}
                 </div>
               </div>
@@ -407,15 +417,19 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
               {copy.tabs.map((t) =>
                 active === t.key ? (
                   <div key={t.key} className="mt-3 rounded-2xl bg-white border border-black/5 px-5 py-4">
-                    <h3 className="text-[15px] md:text-[16px] font-bold mb-2">{t.title}</h3>
+                    <h3 className="text-[15px] md:text-[16px] font-bold text-black md:text-neutral-900 mb-2">
+                      {t.title}
+                    </h3>
                     {Array.isArray(t.body) ? (
-                      <ul className="list-disc pl-5 text-[14px] md:text-[15px] leading-relaxed text-neutral-700 space-y-1">
+                      <ul className="list-disc pl-5 text-[14px] md:text-[15px] leading-relaxed text-black md:text-neutral-800 space-y-1">
                         {t.body.map((line, i) => (
                           <li key={i}>{line}</li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-[14px] md:text-[15px] leading-relaxed text-neutral-700">{t.body}</p>
+                      <p className="text-[14px] md:text-[15px] leading-relaxed text-black md:text-neutral-800">
+                        {t.body}
+                      </p>
                     )}
                   </div>
                 ) : null
@@ -425,7 +439,7 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
         </section>
       )}
 
-      {/* 좌우 화살표(모바일 안전 영역 보정, xs에서는 반투명/작게) */}
+      {/* 좌우 화살표 */}
       <button
         onClick={() => router.push(`/product/${slug}/${prev}`)}
         className="fixed left-3 sm:left-5 bottom-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 bg-white/95 text-black rounded-full p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all active:scale-95 backdrop-blur supports-[env(safe-area-inset-left)]:left-[max(0.75rem,env(safe-area-inset-left))]"

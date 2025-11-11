@@ -49,21 +49,18 @@ function cameraCost(moving: boolean | undefined, width: number | undefined): num
     return 2_800_000;
   }
 }
-
 function lightCost(width: number | undefined): number {
   if (width == null) return 0;
   if (width < 500) return 2_500_000;
   if (width < 1000) return 3_500_000;
   return 4_500_000;
 }
-
 function pcCost(speed: number | undefined): number {
   if (speed == null) return 0;
   if (speed < 30) return 2_500_000;
   if (speed < 60) return 3_000_000;
   return 3_500_000;
 }
-
 function optionCost(comm?: boolean, history?: boolean, dl?: boolean): { comm: number; history: number; dl: number } {
   return {
     comm: comm ? 2_000_000 : 0,
@@ -150,7 +147,7 @@ export default function QuoteWizardPage() {
       <div className="h-14 md:h-16" />
 
       <section className="w-full">
-        {/* 🔧 모바일에서는 좌여백 제거, md부터 살짝, lg에서 기존 ml-28 느낌 */}
+        {/* 좌여백: 모바일 0, md 약간, lg 크게 */}
         <div className="ml-0 md:ml-14 lg:ml-28 mt-6 md:mt-8 mb-12 md:mb-16 mr-0 rounded-l-none md:rounded-l-2xl bg-black overflow-hidden">
           <div className="mx-auto max-w-[1500px] px-5 sm:px-6 md:px-12 py-10 sm:py-14 md:py-20">
             <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 md:gap-10 items-center">
@@ -258,37 +255,16 @@ export default function QuoteWizardPage() {
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* 오른쪽: 결과 or 이미지 */}
-              <div className="flex justify-center lg:justify-end items-center min-h-[360px] sm:min-h-[440px] md:min-h-[500px]">
-                {finalPrice === null ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 xl:gap-40">
-                    {images.map((src, i) => (
-                      <div
-                        key={i}
-                        className="relative w-[72vw] sm:w-[240px] md:w-[260px] xl:w-[300px] aspect-[4/5] rounded-3xl bg-white/5 ring-1 ring-white/10 overflow-hidden"
-                      >
-                        <Image
-                          src={src}
-                          alt={`장비 이미지 ${i + 1}`}
-                          fill
-                          className="object-contain"
-                          sizes="(max-width:640px) 72vw, (max-width:1280px) 33vw, 300px"
-                          priority={i === 0}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center w-full h-full text-center px-4">
+                {/* ✅ 모바일 전용 결과 패널: finalPrice 나왔을 때만 표시 (LG 미만) */}
+                {finalPrice !== null && (
+                  <div className="lg:hidden mt-8 md:mt-10 flex flex-col items-center justify-center w-full text-center px-1">
                     <h3 className="text-white/70 text-[16px] sm:text-[18px] md:text-[20px] mb-3 md:mb-4">예상 견적 금액</h3>
                     <p className="text-[#00AEEF] text-[36px] sm:text-[44px] md:text-[52px] font-bold tracking-tight">
                       {KRW(finalPrice)}
                     </p>
                     <p className="text-white/50 mt-2 text-xs sm:text-sm">※ 부가세 별도 기준</p>
 
-                    {/* 버튼 두 개: 다시 계산하기 + 문의하기 */}
                     <div className="mt-7 md:mt-10 flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                       <button
                         onClick={() => window.location.reload()}
@@ -297,19 +273,14 @@ export default function QuoteWizardPage() {
                       >
                         다시 계산하기
                       </button>
-
-                      {/* ✅ 문의하기: answers 저장 + support 섹션 스크롤 */}
                       <button
                         onClick={() => {
                           try {
                             localStorage.setItem("forvis_quote_answers", JSON.stringify(answers));
                           } catch {}
                           const el = document.getElementById("support");
-                          if (el) {
-                            el.scrollIntoView({ behavior: "smooth", block: "start" });
-                          } else {
-                            window.location.href = "/#support";
-                          }
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                          else window.location.href = "/#support";
                         }}
                         className="inline-flex items-center justify-center h-12 px-6 rounded-xl font-semibold 
                                   bg-white/10 text-white hover:bg-white hover:text-black transition w-full sm:w-auto"
@@ -319,6 +290,65 @@ export default function QuoteWizardPage() {
                     </div>
 
                     <p className="text-white/60 text-xs sm:text-sm mt-3">
+                      실제 견적과 예상 견적 금액은 다를 수 있습니다. 꼭 담당자와 문의하세요!
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* 오른쪽: 결과 or 이미지 — ✅ 모바일에서 이미지 숨김, 데스크탑에서만 표시 */}
+              <div className="hidden lg:flex justify-center lg:justify-end items-center min-h-[360px] sm:min-h-[440px] md:min-h-[500px]">
+                {finalPrice === null ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 xl:gap-40">
+                    {images.map((src, i) => (
+                      <div
+                        key={i}
+                        className="relative w-[260px] xl:w-[300px] aspect-[4/5] rounded-3xl bg-white/5 ring-1 ring-white/10 overflow-hidden"
+                      >
+                        <Image
+                          src={src}
+                          alt={`장비 이미지 ${i + 1}`}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width:1024px) 0px, (max-width:1280px) 33vw, 300px"
+                          priority={i === 0}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full text-center px-4">
+                    <h3 className="text-white/70 text-[18px] md:text-[20px] mb-4">예상 견적 금액</h3>
+                    <p className="text-[#00AEEF] text-[52px] font-bold tracking-tight">
+                      {KRW(finalPrice)}
+                    </p>
+                    <p className="text-white/50 mt-2 text-sm">※ 부가세 별도 기준</p>
+
+                    <div className="mt-10 flex gap-3">
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="inline-flex items-center justify-center h-12 px-6 rounded-xl font-semibold 
+                                  bg-white/10 text-white hover:bg-white hover:text-black transition"
+                      >
+                        다시 계산하기
+                      </button>
+                      <button
+                        onClick={() => {
+                          try {
+                            localStorage.setItem("forvis_quote_answers", JSON.stringify(answers));
+                          } catch {}
+                          const el = document.getElementById("support");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                          else window.location.href = "/#support";
+                        }}
+                        className="inline-flex items-center justify-center h-12 px-6 rounded-xl font-semibold 
+                                  bg-white/10 text-white hover:bg-white hover:text-black transition"
+                      >
+                        문의하기
+                      </button>
+                    </div>
+
+                    <p className="text-white/60 text-sm mt-3">
                       실제 견적과 예상 견적 금액은 다를 수 있습니다. 꼭 담당자와 문의하세요!
                     </p>
                   </div>

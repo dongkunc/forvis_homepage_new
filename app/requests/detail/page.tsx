@@ -8,6 +8,12 @@ export default function RequestDetailPage() {
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // ✅ 스와이프 트래킹
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+
   // 사용자의 "애니메이션 줄이기" 선호 감지
   const reduceMotion = useMemo(
     () =>
@@ -20,11 +26,9 @@ export default function RequestDetailPage() {
   // 화면이 보이지 않을 때 자동 전환 일시정지
   useEffect(() => {
     const onVisibility = () => {
-      if (document.hidden) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
+      if (document.hidden && intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
     document.addEventListener("visibilitychange", onVisibility);
@@ -52,6 +56,42 @@ export default function RequestDetailPage() {
     };
   }, [paused, reduceMotion]);
 
+  // ✅ 스와이프 판정(가로 50px 이상, 세로보다 클 때만)
+  const onTouchStart = (e: React.TouchEvent) => {
+    setPaused(true);
+    const t = e.changedTouches[0];
+    touchStartX.current = t.clientX;
+    touchStartY.current = t.clientY;
+    touchEndX.current = t.clientX;
+    touchEndY.current = t.clientY;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const t = e.changedTouches[0];
+    touchEndX.current = t.clientX;
+    touchEndY.current = t.clientY;
+  };
+
+  const onTouchEnd = () => {
+    setPaused(false);
+    const dx = touchEndX.current - touchStartX.current;
+    const dy = touchEndY.current - touchStartY.current;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    const TH = 50; // 스와이프 임계값(px)
+
+    // 가로 스와이프만 인정
+    if (absX > TH && absX > absY) {
+      if (dx < 0) {
+        // 왼쪽으로 밀기 → 다음
+        setPage((p) => (p === 0 ? 1 : 1));
+      } else {
+        // 오른쪽으로 밀기 → 이전
+        setPage((p) => (p === 1 ? 0 : 0));
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-white text-black">
       <section
@@ -59,8 +99,9 @@ export default function RequestDetailPage() {
         className="mx-auto max-w-[1500px] px-5 sm:px-6 md:px-12 py-10 md:py-14 scroll-mt-20 md:scroll-mt-24"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        onTouchStart={() => setPaused(true)}
-        onTouchEnd={() => setPaused(false)}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
         {/* 타이틀 */}
         <div className="mb-6 md:mb-8">
@@ -126,10 +167,7 @@ function PageOneImmediate() {
       >
         {/* 중앙 시트 */}
         <div className="absolute left-4 right-10 top-8 bottom-8 rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[30]">
-          <MaskedImage
-            src="/CustomerRequestSection/report.png"
-            alt="report"
-          />
+          <MaskedImage src="/CustomerRequestSection/report.png" alt="report" />
         </div>
 
         {/* 상단 우측 패널 */}
@@ -142,7 +180,7 @@ function PageOneImmediate() {
           <MaskedImage src="/CustomerRequestSection/graph.png" alt="graph" />
         </div>
 
-        {/* 비네트(디자인 요소) */}
+        {/* 비네트 */}
         <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-tr from-black/20 via-transparent to-black/10 z-[5]" />
       </div>
     </div>
