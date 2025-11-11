@@ -70,7 +70,6 @@ export default function SupportBoard() {
     };
   });
 
-  // 1회성 사용: 주입 후 스토리지 제거
   useEffect(() => {
     try {
       localStorage.removeItem("forvis_quote_answers");
@@ -102,9 +101,11 @@ export default function SupportBoard() {
     return filled && emailOk(form.email);
   };
 
-  // ── 실제 “보내기”
-  const handleSubmit = async () => {
+  // ✅ 폼 submit 사용 (모바일 IME/자동완성 이슈 해결)
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!canSend() || sending) return;
+
     setSending(true);
     setSent(null);
     setServerMsg("");
@@ -114,10 +115,10 @@ export default function SupportBoard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: form.title,
-          content: form.content,
-          name: form.name,
-          email: form.email,
+          title: form.title.trim(),
+          content: form.content.trim(),
+          name: form.name.trim(),
+          email: form.email.trim(),
         }),
       });
 
@@ -130,13 +131,15 @@ export default function SupportBoard() {
           ...prev,
           title: "",
           content: "",
+          name: "",
+          email: "",
           touched: { title: false, content: false, name: false, email: false },
         }));
       } else {
         setSent("fail");
         setServerMsg(data?.message || "전송에 실패했어요. 잠시 후 다시 시도해주세요.");
       }
-    } catch (e) {
+    } catch {
       setSent("fail");
       setServerMsg("네트워크 오류가 발생했어요. 다시 시도해주세요.");
     } finally {
@@ -150,11 +153,11 @@ export default function SupportBoard() {
   const nameErr = touched.name && name.trim().length === 0;
   const emailErr = touched.email && !emailOk(email);
 
-  // Ctrl/Cmd + Enter 제출, Shift+Enter 줄바꿈 유지
   const onContentKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       e.preventDefault();
-      handleSubmit();
+      // 폼 submit 트리거
+      (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
     }
   };
 
@@ -169,14 +172,15 @@ export default function SupportBoard() {
         </div>
       </div>
 
-      {/* 폼 래퍼 (풀블리드 라이트 그레이) */}
+      {/* 폼 래퍼 */}
       <div className="relative left-1/2 -translate-x-1/2 w-screen bg-[#f5f5f7] mt-5 md:mt-6">
         <div className="max-w-[680px] sm:max-w-[760px] md:max-w-[900px] mx-auto px-5 sm:px-6 md:px-8 py-8 sm:py-10 md:py-12">
-          <div className="rounded-3xl border border-black/5 bg-white p-5 sm:p-6 md:p-8 hover:shadow-sm transition-shadow">
+          <form onSubmit={onSubmit} className="rounded-3xl border border-black/5 bg-white p-5 sm:p-6 md:p-8 hover:shadow-sm transition-shadow">
             <h3 className="text-xl sm:text-[20px] md:text-2xl font-semibold mb-1">문의사항</h3>
-            
+
             <Field
               label="제목"
+              nameAttr="subject"
               value={title}
               onChange={(v) => onChange("title", v)}
               onBlur={() => onBlur("title")}
@@ -187,6 +191,7 @@ export default function SupportBoard() {
 
             <FieldArea
               label="내용"
+              nameAttr="message"
               value={content}
               onChange={(v) => onChange("content", v)}
               onBlur={() => onBlur("content")}
@@ -196,10 +201,10 @@ export default function SupportBoard() {
               onKeyDown={onContentKeyDown}
             />
 
-            {/* 이름/이메일: 1열→2열 반응형 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field
                 label="보내는사람 이름"
+                nameAttr="name"
                 value={name}
                 onChange={(v) => onChange("name", v)}
                 onBlur={() => onBlur("name")}
@@ -207,9 +212,12 @@ export default function SupportBoard() {
                 error={nameErr ? "이름을 입력해주세요." : ""}
                 autoComplete="name"
                 inputMode="text"
+                autoCapitalize="none"
+                autoCorrect="off"
               />
               <Field
                 label="이메일"
+                nameAttr="email"
                 type="email"
                 value={email}
                 onChange={(v) => onChange("email", v)}
@@ -218,50 +226,44 @@ export default function SupportBoard() {
                 error={emailErr ? "이메일 형식을 확인해주세요." : ""}
                 autoComplete="email"
                 inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
               />
             </div>
 
-            {/* 안내 + 버튼: 모바일 풀폭, 데스크 우측 정렬 */}
             <div className="mt-7 sm:mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs sm:text-[13px] text-neutral-400">
                 * 네 칸 모두 입력 + 이메일 형식이 올바르면 버튼이 활성화됩니다.
               </p>
 
               <button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={!canSend() || sending}
                 aria-busy={sending}
                 className={`h-12 sm:h-11 rounded-2xl text-white text-[15px] transition w-full sm:w-auto px-6
-                  ${
-                    canSend() && !sending
-                      ? "bg-black hover:opacity-90"
-                      : "bg-neutral-300 cursor-not-allowed"
-                  }`}
+                  ${canSend() && !sending ? "bg-black hover:opacity-90" : "bg-neutral-300 cursor-not-allowed"}`}
               >
                 {sending ? "보내는 중…" : "보내기"}
               </button>
             </div>
 
-            {/* 결과 메시지 */}
             {sent && (
-              <div
-                className={`mt-4 text-sm ${sent === "ok" ? "text-emerald-600" : "text-rose-600"}`}
-                role="status"
-              >
+              <div className={`mt-4 text-sm ${sent === "ok" ? "text-emerald-600" : "text-rose-600"}`} role="status">
                 {serverMsg}
               </div>
             )}
-          </div>
+          </form>
         </div>
       </div>
     </section>
   );
 }
 
-/* ── 공용 입력 필드 (모바일 폰트≥16px로 iOS 자동줌 방지) ───────────────── */
+/* ── 공용 입력 필드 ───────────────── */
 
 function Field({
   label,
+  nameAttr,
   value,
   onChange,
   onBlur,
@@ -270,8 +272,11 @@ function Field({
   error,
   autoComplete,
   inputMode,
+  autoCapitalize,
+  autoCorrect,
 }: {
   label: string;
+  nameAttr?: string;
   value: string;
   onChange: (v: string) => void;
   onBlur?: () => void;
@@ -280,11 +285,14 @@ function Field({
   error?: string;
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect?: "on" | "off";
 }) {
   return (
     <label className="block mb-4">
       <div className="mb-1 text-[13px] sm:text-sm text-neutral-600">{label}</div>
       <input
+        name={nameAttr}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -292,12 +300,10 @@ function Field({
         placeholder={placeholder}
         autoComplete={autoComplete}
         inputMode={inputMode}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={autoCorrect}
         className={`w-full h-12 sm:h-12 rounded-xl border px-4 outline-none bg-[#fbfbfb] text-[16px] sm:text-[15px] transition
-          ${
-            error
-              ? "border-rose-300 focus:border-rose-400"
-              : "border-black/10 focus:border-black/30"
-          }`}
+          ${error ? "border-rose-300 focus:border-rose-400" : "border-black/10 focus:border-black/30"}`}
       />
       {error ? <p className="mt-1 text-xs text-rose-500">{error}</p> : null}
     </label>
@@ -306,6 +312,7 @@ function Field({
 
 function FieldArea({
   label,
+  nameAttr,
   value,
   onChange,
   onBlur,
@@ -317,6 +324,7 @@ function FieldArea({
   onKeyDown,
 }: {
   label: string;
+  nameAttr?: string;
   value: string;
   onChange: (v: string) => void;
   onBlur?: () => void;
@@ -334,6 +342,7 @@ function FieldArea({
         {counter ? <span className="text-neutral-400 text-[12px]">{counter}</span> : null}
       </div>
       <textarea
+        name={nameAttr}
         rows={rows}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -341,18 +350,10 @@ function FieldArea({
         placeholder={placeholder}
         onKeyDown={onKeyDown}
         className={`w-full rounded-xl border px-4 py-3 outline-none bg-[#fbfbfb] resize-y text-[16px] sm:text-[15px] transition
-          ${
-            error
-              ? "border-rose-300 focus:border-rose-400"
-              : "border-black/10 focus:border-black/30"
-          }`}
+          ${error ? "border-rose-300 focus:border-rose-400" : "border-black/10 focus:border-black/30"}`}
       />
       <div className="mt-1 flex items-center justify-between">
-        {error ? (
-          <p className="text-xs text-rose-500">{error}</p>
-        ) : (
-          <p className="text-xs text-neutral-400">{hint}</p>
-        )}
+        {error ? <p className="text-xs text-rose-500">{error}</p> : <p className="text-xs text-neutral-400">{hint}</p>}
       </div>
     </label>
   );
