@@ -1,3 +1,4 @@
+// app/components/SupportBoard.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -69,7 +70,7 @@ export default function SupportBoard() {
     };
   });
 
-  // (선택) 1회성 사용: 주입 후 스토리지 제거
+  // 1회성 사용: 주입 후 스토리지 제거
   useEffect(() => {
     try {
       localStorage.removeItem("forvis_quote_answers");
@@ -125,7 +126,6 @@ export default function SupportBoard() {
       if (res.ok && data?.ok) {
         setSent("ok");
         setServerMsg("문의가 정상 접수되었습니다. 빠르게 회신드릴게요!");
-        // 전송 후 폼 초기화 (이름/이메일은 남겨두고 싶으면 아래 두 줄 삭제)
         setForm((prev) => ({
           ...prev,
           title: "",
@@ -150,22 +150,31 @@ export default function SupportBoard() {
   const nameErr = touched.name && name.trim().length === 0;
   const emailErr = touched.email && !emailOk(email);
 
+  // Ctrl/Cmd + Enter 제출, Shift+Enter 줄바꿈 유지
+  const onContentKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
     <section id="support" className="scroll-mt-14 bg-white text-black">
       {/* 헤더 */}
-      <div className="max-w-[1500px] mx-auto px-8 pt-12">
+      <div className="max-w-[1200px] lg:max-w-[1500px] mx-auto px-5 sm:px-6 md:px-8 pt-10 md:pt-12">
         <div className="flex items-end justify-between">
-          <h1 className="text-4xl font-bold tracking-tight">문의하기</h1>
+          <h1 className="text-[28px] sm:text-[32px] md:text-[36px] font-bold tracking-tight">
+            문의하기
+          </h1>
         </div>
       </div>
 
-      {/* 폼 본문 */}
-      <div className="relative left-1/2 -translate-x-1/2 w-screen bg-[#f5f5f7] mt-6">
-        <div className="max-w-[900px] mx-auto px-8 py-12">
-          <div className="rounded-3xl border border-black/5 bg-white p-8 hover:shadow-sm transition-shadow">
-            <h3 className="text-2xl font-semibold mb-1">문의사항</h3>
-            <p className="text-sm text-neutral-500 mb-8"></p>
-
+      {/* 폼 래퍼 (풀블리드 라이트 그레이) */}
+      <div className="relative left-1/2 -translate-x-1/2 w-screen bg-[#f5f5f7] mt-5 md:mt-6">
+        <div className="max-w-[680px] sm:max-w-[760px] md:max-w-[900px] mx-auto px-5 sm:px-6 md:px-8 py-8 sm:py-10 md:py-12">
+          <div className="rounded-3xl border border-black/5 bg-white p-5 sm:p-6 md:p-8 hover:shadow-sm transition-shadow">
+            <h3 className="text-xl sm:text-[20px] md:text-2xl font-semibold mb-1">문의사항</h3>
+            
             <Field
               label="제목"
               value={title}
@@ -173,6 +182,7 @@ export default function SupportBoard() {
               onBlur={() => onBlur("title")}
               placeholder="예) Vision 관련 문의"
               error={titleErr ? "제목을 입력해주세요." : ""}
+              autoComplete="on"
             />
 
             <FieldArea
@@ -181,10 +191,12 @@ export default function SupportBoard() {
               onChange={(v) => onChange("content", v)}
               onBlur={() => onBlur("content")}
               placeholder="문의 내용을 자세히 적어주세요."
-              rows={8}
+              rows={10}
               error={contentErr ? "내용을 입력해주세요." : ""}
+              onKeyDown={onContentKeyDown}
             />
 
+            {/* 이름/이메일: 1열→2열 반응형 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field
                 label="보내는사람 이름"
@@ -193,6 +205,8 @@ export default function SupportBoard() {
                 onBlur={() => onBlur("name")}
                 placeholder="홍길동"
                 error={nameErr ? "이름을 입력해주세요." : ""}
+                autoComplete="name"
+                inputMode="text"
               />
               <Field
                 label="이메일"
@@ -202,18 +216,22 @@ export default function SupportBoard() {
                 onBlur={() => onBlur("email")}
                 placeholder="you@example.com"
                 error={emailErr ? "이메일 형식을 확인해주세요." : ""}
+                autoComplete="email"
+                inputMode="email"
               />
             </div>
 
-            <div className="mt-8 flex items-center justify-between">
-              <p className="text-xs text-neutral-400">
+            {/* 안내 + 버튼: 모바일 풀폭, 데스크 우측 정렬 */}
+            <div className="mt-7 sm:mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs sm:text-[13px] text-neutral-400">
                 * 네 칸 모두 입력 + 이메일 형식이 올바르면 버튼이 활성화됩니다.
               </p>
 
               <button
                 onClick={handleSubmit}
                 disabled={!canSend() || sending}
-                className={`h-11 px-6 rounded-2xl text-white text-[15px] transition
+                aria-busy={sending}
+                className={`h-12 sm:h-11 rounded-2xl text-white text-[15px] transition w-full sm:w-auto px-6
                   ${
                     canSend() && !sending
                       ? "bg-black hover:opacity-90"
@@ -227,9 +245,8 @@ export default function SupportBoard() {
             {/* 결과 메시지 */}
             {sent && (
               <div
-                className={`mt-4 text-sm ${
-                  sent === "ok" ? "text-emerald-600" : "text-rose-600"
-                }`}
+                className={`mt-4 text-sm ${sent === "ok" ? "text-emerald-600" : "text-rose-600"}`}
+                role="status"
               >
                 {serverMsg}
               </div>
@@ -241,7 +258,7 @@ export default function SupportBoard() {
   );
 }
 
-/* ── 공용 입력 필드 ─────────────────────────────── */
+/* ── 공용 입력 필드 (모바일 폰트≥16px로 iOS 자동줌 방지) ───────────────── */
 
 function Field({
   label,
@@ -251,6 +268,8 @@ function Field({
   placeholder,
   type = "text",
   error,
+  autoComplete,
+  inputMode,
 }: {
   label: string;
   value: string;
@@ -259,17 +278,21 @@ function Field({
   placeholder?: string;
   type?: "text" | "email";
   error?: string;
+  autoComplete?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   return (
     <label className="block mb-4">
-      <div className="mb-1 text-sm text-neutral-600">{label}</div>
+      <div className="mb-1 text-[13px] sm:text-sm text-neutral-600">{label}</div>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         placeholder={placeholder}
-        className={`w-full h-12 rounded-xl border px-4 outline-none bg-[#fbfbfb] transition
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        className={`w-full h-12 sm:h-12 rounded-xl border px-4 outline-none bg-[#fbfbfb] text-[16px] sm:text-[15px] transition
           ${
             error
               ? "border-rose-300 focus:border-rose-400"
@@ -287,10 +310,11 @@ function FieldArea({
   onChange,
   onBlur,
   placeholder,
-  rows = 6,
+  rows = 8,
   hint,
   error,
   counter,
+  onKeyDown,
 }: {
   label: string;
   value: string;
@@ -301,14 +325,13 @@ function FieldArea({
   hint?: string;
   error?: string;
   counter?: string;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }) {
   return (
     <label className="block mb-4">
-      <div className="mb-1 text-sm text-neutral-600 flex items-center justify-between">
+      <div className="mb-1 text-[13px] sm:text-sm text-neutral-600 flex items-center justify-between">
         <span>{label}</span>
-        {counter ? (
-          <span className="text-neutral-400 text-[12px]">{counter}</span>
-        ) : null}
+        {counter ? <span className="text-neutral-400 text-[12px]">{counter}</span> : null}
       </div>
       <textarea
         rows={rows}
@@ -316,7 +339,8 @@ function FieldArea({
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         placeholder={placeholder}
-        className={`w-full rounded-xl border px-4 py-3 outline-none bg-[#fbfbfb] resize-y transition
+        onKeyDown={onKeyDown}
+        className={`w-full rounded-xl border px-4 py-3 outline-none bg-[#fbfbfb] resize-y text-[16px] sm:text-[15px] transition
           ${
             error
               ? "border-rose-300 focus:border-rose-400"
