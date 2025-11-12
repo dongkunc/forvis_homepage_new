@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://forvis.io/sitemap.xml
