@@ -72,20 +72,14 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
   const next = (p === 3 ? 1 : (p + 1)) as 1 | 2 | 3;
 
   const router = useRouter();
-  const [paused, setPaused] = useState(false);
   const [active, setActive] = useState(COPY[folder].tabs[0].key);
-
-  const prefersReducedMotion = useRef(false);
-  useEffect(() => {
-    prefersReducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
 
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const rightRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
-
   const [panelTop, setPanelTop] = useState(12);
 
+  // 패널 위치 재계산
   useEffect(() => {
     const recalc = () => {
       const el = btnRefs.current[active];
@@ -111,20 +105,15 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
     };
   }, [active]);
 
-  useEffect(() => {
-    if (paused || prefersReducedMotion.current) return;
-    const t = setTimeout(() => router.push(`/product/${slug}/${next}`), 5000);
-    return () => clearTimeout(t);
-  }, [paused, slug, next, router]);
+  // 자동 슬라이드 제거 완료(타이머 없음)
 
+  // 스와이프(수동 전환)
   const touchStartX = useRef<number | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX ?? null;
-    setPaused(true);
   };
   const onTouchEnd = (e: React.TouchEvent) => {
     const start = touchStartX.current;
-    setPaused(false);
     if (start == null) return;
     const dx = e.changedTouches[0].clientX - start;
     if (Math.abs(dx) > 40) {
@@ -134,6 +123,7 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
     touchStartX.current = null;
   };
 
+  // 키보드 화살표 이동(수동 전환)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") router.push(`/product/${slug}/${next}`);
@@ -149,8 +139,6 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
   return (
     <main
       className="relative min-h-screen bg-white"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       aria-label={`${product.title} 상세 페이지`}
@@ -258,7 +246,7 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
               ref={rightRef}
               className="relative rounded-3xl overflow-hidden bg-white border border-black/10 min-h-[420px] sm:min-h-[480px] md:min-h-[540px]"
             >
-              {/* ✅ 데스크탑(lg↑)에서만 제품 이미지 표시 */}
+              {/* 데스크탑(lg↑)에서만 제품 이미지 표시 */}
               <div className="hidden lg:block absolute inset-0">
                 <Image
                   src={product.image}
@@ -270,7 +258,7 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
                 />
               </div>
 
-              {/* 떠있는 디테일 패널(모바일/데스크탑 공통) */}
+              {/* 떠있는 디테일 패널 */}
               <div
                 ref={panelRef}
                 id={`panel-${active}`}
@@ -299,13 +287,11 @@ export default function DetailStep({ slug, page, product, folder }: Props) {
                 </div>
               </div>
             </div>
-
-            {/* ❌ 모바일 하단 아코디언은 제거(중복 방지) */}
           </div>
         </section>
       )}
 
-      {/* 좌우 화살표 */}
+      {/* 좌우 화살표(수동 전환) */}
       <button
         onClick={() => router.push(`/product/${slug}/${prev}`)}
         className="fixed left-3 sm:left-5 bottom-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 bg-white/95 text-black rounded-full p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all active:scale-95 backdrop-blur supports-[env(safe-area-inset-left)]:left-[max(0.75rem,env(safe-area-inset-left))]"
