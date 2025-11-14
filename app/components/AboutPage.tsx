@@ -5,11 +5,9 @@ import Image from "next/image";
 import { useState } from "react";
 
 // 🔧 제목 폰트 크기/줄간격
-const TITLE_FONT =
-  "text-[clamp(30px,4vw,30px)] leading-[2]";
+const TITLE_FONT = "text-[clamp(30px,4vw,30px)] leading-[2]";
 // 🔧 본문 폰트 크기/줄간격
-const SUB_FONT =
-  "text-[clamp(13px,3vw,18px)] leading-relaxed";
+const SUB_FONT = "text-[clamp(13px,3vw,18px)] leading-relaxed";
 
 export default function AboutPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -20,42 +18,25 @@ export default function AboutPage() {
       img: "/aboutpage/think1.jpg",
       title: "Communication",
       color: "text-[#ced027]",
-      desc: [
-        "투명한 커뮤니케이션",
-        "적극적인 피드백",
-        "협력과 공동의 목표",
-        "혁신적인 변화",
-      ],
+      desc: ["투명한 커뮤니케이션", "적극적인 피드백", "협력과 공동의 목표", "혁신적인 변화"],
     },
     {
       img: "/aboutpage/think2.jpg",
       title: "Custom",
       color: "text-neutral-800",
-      desc: [
-        "고객 맞춤형 제품/서비스 설계",
-        "창의적 문제 해결",
-        "고객과의 긴밀한 협력",
-      ],
+      desc: ["고객 맞춤형 제품/서비스 설계", "창의적 문제 해결", "고객과의 긴밀한 협력"],
     },
     {
       img: "/aboutpage/think3.jpg",
       title: "Together",
       color: "text-[#0085b5]",
-      desc: [
-        "팀워크와 협력",
-        "고객과 함께 지속 가능한 성장",
-        "상호 존중과 소통",
-      ],
+      desc: ["팀워크와 협력", "고객과 함께 지속 가능한 성장", "상호 존중과 소통"],
     },
     {
       img: "/aboutpage/think4.jpg",
       title: "Perfect",
       color: "text-neutral-600",
-      desc: [
-        "최고 품질의 제품과 서비스",
-        "정밀한 실행과 혁신",
-        "지속 가능한 완벽",
-      ],
+      desc: ["최고 품질의 제품과 서비스", "정밀한 실행과 혁신", "지속 가능한 완벽"],
     },
   ];
 
@@ -117,9 +98,7 @@ export default function AboutPage() {
           기업소개
         </h1>
         <p className="mb-6 leading-relaxed">
-          <span className="font-semibold text-[clamp(18px,4vw,26px)]">
-            생각.
-          </span>
+          <span className="font-semibold text-[clamp(18px,4vw,26px)]">생각.</span>
           <span className="ml-3 text-gray-500 text-[clamp(14px,3.5vw,22px)]">
             포비스의 중심
           </span>
@@ -150,25 +129,24 @@ export default function AboutPage() {
                 "
               >
                 {/* 이미지 */}
-              <div
-                className={`
+                <div
+                  className={`
                   relative w-full
                   max-w-[420px]
                   mx-auto
                   aspect-[4/3]
-                  rounded-xl overflow-hidden     /* 🔥 추가된 부분 */
+                  rounded-xl overflow-hidden
                   ${imageLeft ? "order-1" : "order-2 md:order-2"}
                 `}
-              >
-                <Image
-                  src={v.img}
-                  alt={v.title}
-                  fill
-                  className="object-cover"   /* object-contain → object-cover로 변경하면 더 자연스러움 */
-                  sizes="(max-width: 768px) 80vw, 380px"
-                />
-              </div>
-
+                >
+                  <Image
+                    src={v.img}
+                    alt={v.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 80vw, 380px"
+                  />
+                </div>
 
                 {/* 텍스트 */}
                 <div
@@ -187,16 +165,10 @@ export default function AboutPage() {
                     `}
                   >
                     {/* 제목 */}
-                    <h2
-                      className={`${TITLE_FONT} font-bold ${v.color}`}
-                    >
-                      {v.title}
-                    </h2>
+                    <h2 className={`${TITLE_FONT} font-bold ${v.color}`}>{v.title}</h2>
 
                     {/* 설명 리스트 */}
-                    <ul
-                      className={`${SUB_FONT} text-black space-y-1 md:space-y-1.5`}
-                    >
+                    <ul className={`${SUB_FONT} text-black space-y-1 md:space-y-1.5`}>
                       {v.desc.map((line, i) => (
                         <li key={i}>{line}</li>
                       ))}
@@ -212,16 +184,14 @@ export default function AboutPage() {
       {/* 3) 함께 헤더 + 4그리드 */}
       <section className="max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 pt-6 md:pt-8">
         <p className="mb-6 leading-relaxed">
-          <span className="font-bold text-[clamp(20px,4.5vw,30px)]">
-            함께.
-          </span>
+          <span className="font-bold text-[clamp(20px,4.5vw,30px)]">함께.</span>
           <span className="ml-3 font-semibold text-neutral-500 text-[clamp(14px,3.5vw,22px)]">
             임직원 모두가 주인인
           </span>
         </p>
 
         {/* 4개 복리후생 패널 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 pt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pt-4">
           {items.map((item, idx) => {
             const isOpen = openIndex === idx;
 
@@ -270,7 +240,7 @@ export default function AboutPage() {
                     ${isOpen ? "opacity-100" : ""}
                   `}
                 >
-                  <ul className="space-y-2 text-xs md:text-xl">
+                  <ul className="space-y-2 text-xs sm:text-sm md:text-base lg:text-xl">
                     {item.desc.map((line, i) => (
                       <li key={i}>{line}</li>
                     ))}
