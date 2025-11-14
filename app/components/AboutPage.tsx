@@ -65,9 +65,9 @@ export default function AboutPage() {
       img: "/aboutpage/about1.jpg",
       title: "근무환경",
       desc: [
-        "월, 화, 목, 금, – 주 4일 근무만 합시다.",
+        "월, 화, 목, 금 – 주 4일 근무만 합시다.",
         "출근시간 지옥은 피하고 9:30에 출근해요.",
-        "퇴근은 급한 일이 있으면 내일의 당신에게 미루고 먼저 퇴근하세요.",
+        "급한 일이 생기면 내일의 당신에게 미루고 먼저 퇴근하세요.",
         "당신은 업무와 성장에만 몰두하세요.",
       ],
     },
@@ -98,7 +98,8 @@ export default function AboutPage() {
         "자유로운 복장으로 편하게 출근하세요.",
         "갑작스런 외부 스케줄 발생대비 옷장에 단정한 옷 보관도 가능해요.",
         "인스턴트커피 그만! 전문매장에서 사 드세요. 물론 회사가 삽니다.",
-        "창립기념일(10월 2일)에는 전 직원과 함께 쉬어요. 개천절과 연휴를 마음껏 누리세요.",
+        "창립기념일(10월 2일)에는 전 직원과 함께 쉬어요.",
+        "개천절과 연휴를 마음껏 누리세요.",
       ],
     },
   ];
@@ -242,7 +243,7 @@ export default function AboutPage() {
                 />
 
                 {/* 항상 상단 좌측에 보이는 타이틀 */}
-                <div className="absolute left-4 top-4 z-20 bg-black/60 text-white px-3 py-1 rounded-full text-xl font-semibold">
+                <div className="absolute left-4 top-4 z-20 text-white px-3 py-1 text-2xl font-semibold">
                   {item.title}
                 </div>
 
@@ -262,7 +263,7 @@ export default function AboutPage() {
                 {/* Hover / Tap Overlay — 설명 텍스트 */}
                 <div
                   className={`
-                    absolute inset-0 bg-black/60
+                    absolute inset-0 bg-black/80
                     flex flex-col justify-center
                     items-start text-white px-6 md:px-8 text-left
                     transition-opacity duration-300
