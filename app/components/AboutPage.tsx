@@ -1,17 +1,71 @@
 // app/about/page.tsx
 "use client";
+
 import Image from "next/image";
 import { useState } from "react";
+
+// 🔧 제목 폰트 크기/줄간격
+const TITLE_FONT =
+  "text-[clamp(30px,4vw,30px)] leading-[2]";
+// 🔧 본문 폰트 크기/줄간격
+const SUB_FONT =
+  "text-[clamp(13px,3vw,18px)] leading-relaxed";
 
 export default function AboutPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+  // 중간 think1~4 영역 텍스트
+  const values = [
+    {
+      img: "/aboutpage/think1.jpg",
+      title: "Communication",
+      color: "text-[#ced027]",
+      desc: [
+        "투명한 커뮤니케이션",
+        "적극적인 피드백",
+        "협력과 공동의 목표",
+        "혁신적인 변화",
+      ],
+    },
+    {
+      img: "/aboutpage/think2.jpg",
+      title: "Custom",
+      color: "text-neutral-800",
+      desc: [
+        "고객 맞춤형 제품/서비스 설계",
+        "창의적 문제 해결",
+        "고객과의 긴밀한 협력",
+      ],
+    },
+    {
+      img: "/aboutpage/think3.jpg",
+      title: "Together",
+      color: "text-[#0085b5]",
+      desc: [
+        "팀워크와 협력",
+        "고객과 함께 지속 가능한 성장",
+        "상호 존중과 소통",
+      ],
+    },
+    {
+      img: "/aboutpage/think4.jpg",
+      title: "Perfect",
+      color: "text-neutral-600",
+      desc: [
+        "최고 품질의 제품과 서비스",
+        "정밀한 실행과 혁신",
+        "지속 가능한 완벽",
+      ],
+    },
+  ];
+
+  // 아래 복리후생 카드
   const items = [
     {
       img: "/aboutpage/about1.jpg",
       title: "근무환경",
       desc: [
-        "월, 화, 일, 목, 금, 토, 일 – 주 4일 근무만 합시다.",
+        "월, 화, 목, 금, – 주 4일 근무만 합시다.",
         "출근시간 지옥은 피하고 9:30에 출근해요.",
         "퇴근은 급한 일이 있으면 내일의 당신에게 미루고 먼저 퇴근하세요.",
         "당신은 업무와 성장에만 몰두하세요.",
@@ -53,7 +107,7 @@ export default function AboutPage() {
       {/* 1) 기업소개 헤더 */}
       <section
         id="about"
-        className="scroll-mt-14 max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 pt-20 md:pt-24"
+        className="scroll-mt-14 max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 pt-10 md:pt-12"
       >
         <h1
           className="mb-2 font-bold tracking-tight
@@ -71,33 +125,91 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* 1) 이미지 패널 */}
-      <section
-        className="
-          relative left-1/2 -translate-x-1/2 w-screen bg-white
-          py-6 md:py-10
-        "
-      >
-        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8">
-          <div
-            className="relative w-full overflow-hidden
-                          rounded-xl md:rounded-2xl border border-black/5
-                          aspect-[16/10] md:aspect-[16/9]"
-          >
-            <Image
-              src="/think.png"
-              alt="생각. 포비스의 중심"
-              fill
-              priority
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, (max-width: 1500px) 100vw, 1500px"
-            />
-          </div>
+      {/* 2) THINK 4개 – 이미지/텍스트 교차 레이아웃 */}
+      <section className="w-full bg-white">
+        <div
+          className="
+            max-w-[900px]
+            mx-auto px-4 sm:px-6 md:px-8
+            py-2 md:py-4
+            space-y-6 md:space-y-10
+          "
+        >
+          {values.map((v, idx) => {
+            const imageLeft = idx % 2 === 0; // 0,2: 이미지 좌측 / 1,3: 이미지 우측
+
+            return (
+              <div
+                key={v.title}
+                className="
+                  grid grid-cols-1 md:grid-cols-[1fr_1fr]
+                  items-center justify-center
+                  gap-4 md:gap-6
+                  mx-auto
+                "
+              >
+                {/* 이미지 */}
+              <div
+                className={`
+                  relative w-full
+                  max-w-[420px]
+                  mx-auto
+                  aspect-[4/3]
+                  rounded-xl overflow-hidden     /* 🔥 추가된 부분 */
+                  ${imageLeft ? "order-1" : "order-2 md:order-2"}
+                `}
+              >
+                <Image
+                  src={v.img}
+                  alt={v.title}
+                  fill
+                  className="object-cover"   /* object-contain → object-cover로 변경하면 더 자연스러움 */
+                  sizes="(max-width: 768px) 80vw, 380px"
+                />
+              </div>
+
+
+                {/* 텍스트 */}
+                <div
+                  className={`
+                    max-w-[360px] w-full
+                    ${imageLeft ? "order-2 md:ml-auto md:text-left" : "order-1 md:mr-auto md:text-left"}
+                  `}
+                >
+                  {/* 제목과 리스트를 같은 높이에서 시작시키는 GRID */}
+                  <div
+                    className={`
+                      grid grid-cols-[auto,1fr]
+                      gap-x-4 gap-y-1 md:gap-y-1.5
+                      items-start
+                      ${imageLeft ? "justify-end" : ""}
+                    `}
+                  >
+                    {/* 제목 */}
+                    <h2
+                      className={`${TITLE_FONT} font-bold ${v.color}`}
+                    >
+                      {v.title}
+                    </h2>
+
+                    {/* 설명 리스트 */}
+                    <ul
+                      className={`${SUB_FONT} text-black space-y-1 md:space-y-1.5`}
+                    >
+                      {v.desc.map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* 2) 함께 헤더 + 4그리드 */}
-      <section className="max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 pt-10 md:pt-14">
+      {/* 3) 함께 헤더 + 4그리드 */}
+      <section className="max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 pt-6 md:pt-8">
         <p className="mb-6 leading-relaxed">
           <span className="font-bold text-[clamp(20px,4.5vw,30px)]">
             함께.
@@ -133,7 +245,7 @@ export default function AboutPage() {
                   {item.title}
                 </div>
 
-                {/* 중앙 '+' 아이콘 — 호버 시, 모바일에서 오버레이 열리면 사라짐 */}
+                {/* 중앙 '+' 아이콘 */}
                 <div
                   className={`
                     absolute inset-0 flex items-center justify-center

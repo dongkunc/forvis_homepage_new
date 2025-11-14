@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="pt-3">{children}</main>
 
         {/* ✅ Footer 추가 */}
-        <footer className="mt-32 border-t border-white/10 py-10 text-sm text-gray-400 text-center">
+        <footer className="mt-8 border-t border-white/10 py-10 text-sm text-gray-400 text-center">
           <p>상호: (주)포비스 | FORVIS Inc.</p>
           <p>사업자등록번호: 289-81-03292</p>
           <p>주소: 충청남도 천안시 서북구 2공단 1로 1158호 (천안자이타워)</p>
